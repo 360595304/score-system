@@ -79,7 +79,7 @@ def remove_stu(sid):
 
 def getCourses():
     conn, cursor = getConnect()
-    sql = 'select distinct course from results'
+    sql = 'select * from course'
     res = []
     try:
         cursor.execute(sql)
@@ -94,12 +94,57 @@ def getCourses():
     return res
 
 
-def getScore(course):
+def getCourse(course_id):
     conn, cursor = getConnect()
-    sql = 'select s_id, s.name, college, class,score from results join student s on s.id = results.s_id where course like %s'
+    sql = 'select * from course where id = %s'
     res = []
     try:
-        cursor.execute(sql, '%' + course + '%')
+        cursor.execute(sql, course_id)
+        conn.commit()
+        res = cursor.fetchall()[0]
+    except Exception as e:
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+    return res
+
+
+def add_course(course):
+    conn, cursor = getConnect()
+
+    sql = 'insert into course (id,name,description)values(%s,%s,%s)'
+    try:
+        cursor.execute(sql, course)
+        conn.commit()
+    except Exception as e:
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def update_course(course):
+    conn, cursor = getConnect()
+    sql = 'update course set name=%s,description=%s where id=%s'
+    stu = (course[1], course[2], course[0])
+    try:
+        cursor.execute(sql, stu)
+        conn.commit()
+    except Exception as e:
+        raise e
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def getScore(course_id):
+    conn, cursor = getConnect()
+    sql = 'select s_id, s.name, college, class,score from results join student s on s.id = results.s_id where results.course_id ' \
+          '= %s'
+    res = []
+    try:
+        cursor.execute(sql, course_id)
         conn.commit()
         for i in cursor.fetchall():
             res.append(i)
@@ -128,11 +173,11 @@ def getTotalScore():
     return res
 
 
-def add_score(sid, course, score):
+def add_score(sid, course_id, score):
     conn, cursor = getConnect()
-    sql = 'insert into results (s_id, course, score) VALUES (%s,%s,%s)'
+    sql = 'insert into results (s_id, course_id, score) VALUES (%s,%s,%s)'
     try:
-        cursor.execute(sql, (sid, course, score))
+        cursor.execute(sql, (sid, course_id, score))
         conn.commit()
     except Exception as e:
         raise e
@@ -141,11 +186,11 @@ def add_score(sid, course, score):
         conn.close()
 
 
-def update_score(sid, course, score):
+def update_score(sid, course_id, score):
     conn, cursor = getConnect()
-    sql = 'update results set score=%s where s_id=%s and course=%s'
+    sql = 'update results set score=%s where s_id=%s and course_id=%s'
     try:
-        cursor.execute(sql, (score, sid, course))
+        cursor.execute(sql, (score, sid, course_id))
         conn.commit()
     except Exception as e:
         raise e
@@ -170,12 +215,13 @@ def getSid():
         conn.close()
     return res
 
-def get_stu(sid ,course):
+
+def get_stu(sid, course_id):
     conn, cursor = getConnect()
-    sql = 'select * from results where s_id=%s and course=%s'
+    sql = 'select * from results where s_id=%s and course_id=%s'
     res = []
     try:
-        cursor.execute(sql, (sid, course))
+        cursor.execute(sql, (sid, course_id))
         conn.commit()
         for i in cursor.fetchall():
             res.append(i)
@@ -185,4 +231,3 @@ def get_stu(sid ,course):
         cursor.close()
         conn.close()
     return res
-

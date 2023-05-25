@@ -11,7 +11,7 @@
  Target Server Version : 80021
  File Encoding         : 65001
 
- Date: 15/02/2022 17:30:26
+ Date: 25/05/2023 20:50:52
 */
 
 SET NAMES utf8mb4;
@@ -34,39 +34,62 @@ CREATE TABLE `admin`  (
 INSERT INTO `admin` VALUES (1, 'admin', '123456');
 
 -- ----------------------------
+-- Table structure for course
+-- ----------------------------
+DROP TABLE IF EXISTS `course`;
+CREATE TABLE `course`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of course
+-- ----------------------------
+INSERT INTO `course` VALUES (1, 'C++', '学C++写代码');
+INSERT INTO `course` VALUES (2, 'Java', '学Java找个班上');
+INSERT INTO `course` VALUES (3, '数据结构', '数据结构是基础啊');
+INSERT INTO `course` VALUES (4, '算法', '学算法打比赛');
+INSERT INTO `course` VALUES (5, 'Python', '学Python爬虫');
+INSERT INTO `course` VALUES (6, '计算机网络', '必学');
+INSERT INTO `course` VALUES (7, '数据库', 'MySQL');
+INSERT INTO `course` VALUES (8, '操作系统', '操作系统好啊');
+
+-- ----------------------------
 -- Table structure for results
 -- ----------------------------
 DROP TABLE IF EXISTS `results`;
 CREATE TABLE `results`  (
   `id` int NOT NULL AUTO_INCREMENT,
   `s_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `course` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `course_id` int NOT NULL,
   `score` decimal(10, 2) NOT NULL,
   PRIMARY KEY (`id`) USING BTREE,
-  INDEX `course_id`(`course`) USING BTREE,
+  INDEX `course_id`(`course_id`) USING BTREE,
   INDEX `sid`(`s_id`) USING BTREE,
   CONSTRAINT `sid` FOREIGN KEY (`s_id`) REFERENCES `student` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of results
 -- ----------------------------
-INSERT INTO `results` VALUES (1, '1901', 'C++', 93.00);
-INSERT INTO `results` VALUES (2, '1901', 'Java', 89.00);
-INSERT INTO `results` VALUES (3, '1901', '数据结构', 89.00);
-INSERT INTO `results` VALUES (4, '1901', '算法', 89.00);
-INSERT INTO `results` VALUES (5, '1901', 'Python', 89.00);
-INSERT INTO `results` VALUES (6, '1902', 'C++', 70.00);
-INSERT INTO `results` VALUES (7, '1902', 'Java', 88.00);
-INSERT INTO `results` VALUES (8, '1902', '数据结构', 89.00);
-INSERT INTO `results` VALUES (9, '1902', 'Python', 89.00);
-INSERT INTO `results` VALUES (10, '1902', '算法', 89.00);
-INSERT INTO `results` VALUES (11, '1903', 'C++', 77.00);
-INSERT INTO `results` VALUES (12, '1903', 'Java', 89.00);
-INSERT INTO `results` VALUES (13, '1903', 'Python', 89.00);
-INSERT INTO `results` VALUES (14, '1903', '数据结构', 89.00);
-INSERT INTO `results` VALUES (15, '1903', '算法', 89.00);
-INSERT INTO `results` VALUES (17, '1904', 'C++', 85.00);
+INSERT INTO `results` VALUES (1, '1901', 1, 93.00);
+INSERT INTO `results` VALUES (2, '1901', 2, 89.00);
+INSERT INTO `results` VALUES (3, '1901', 3, 89.00);
+INSERT INTO `results` VALUES (4, '1901', 4, 89.00);
+INSERT INTO `results` VALUES (5, '1901', 5, 89.00);
+INSERT INTO `results` VALUES (6, '1902', 1, 70.00);
+INSERT INTO `results` VALUES (7, '1902', 2, 88.00);
+INSERT INTO `results` VALUES (8, '1902', 3, 81.00);
+INSERT INTO `results` VALUES (9, '1902', 5, 89.00);
+INSERT INTO `results` VALUES (10, '1902', 4, 89.00);
+INSERT INTO `results` VALUES (11, '1903', 1, 77.00);
+INSERT INTO `results` VALUES (12, '1903', 2, 89.00);
+INSERT INTO `results` VALUES (13, '1903', 5, 89.00);
+INSERT INTO `results` VALUES (14, '1903', 3, 89.00);
+INSERT INTO `results` VALUES (15, '1903', 4, 89.00);
+INSERT INTO `results` VALUES (17, '1904', 1, 80.00);
 
 -- ----------------------------
 -- Table structure for student

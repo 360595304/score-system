@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import messagebox, font
 from tkinter.ttk import Treeview
 import xlsxwriter
+
+from PythonStudy.design.coursedetail import CourseDetail
 from dao import *
 from scoredetail import ScoreDetail
 from studetail import StuDetail
@@ -34,12 +36,14 @@ class TeacherSide(Tk):
         # 添加左边按钮
         self.Button_stu = Button(self.Pane_left, text="学生信息", command=self.show_stu)
         self.Button_stu.place(x=20, y=20)
+        self.Button_course = Button(self.Pane_left, text="课程信息", command=self.show_course)
+        self.Button_course.place(x=20, y=60)
         self.Button_score = Button(self.Pane_left, text="考试成绩", command=self.show_score)
-        self.Button_score.place(x=20, y=60)
+        self.Button_score.place(x=20, y=100)
         self.Button_stu = Button(self.Pane_left, text="导出学生", command=self.stu_xls)
-        self.Button_stu.place(x=20, y=100)
+        self.Button_stu.place(x=20, y=140)
         self.Button_score = Button(self.Pane_left, text="导出成绩", command=self.score_xls)
-        self.Button_score.place(x=20, y=140)
+        self.Button_score.place(x=20, y=180)
 
         # 右边：查询、TreeView
         self.Pane_right = PanedWindow(width=725, height=540)
@@ -96,8 +100,9 @@ class TeacherSide(Tk):
         self.course_label.place(x=5, y=13)
         self.var_course = StringVar()
         self.courses = getCourses()
-        self.var_course.set(self.courses[0])
-        self.course_menu = OptionMenu(self.LabelFrame_score, self.var_course, *self.courses, '总分')
+        # print(getCourses())
+        self.var_course.set(self.courses[0][1])
+        self.course_menu = OptionMenu(self.LabelFrame_score, self.var_course, *[x[1] for x in self.courses], '总分')
         self.course_menu.place(x=40, y=10)
         self.change_button = Button(self.LabelFrame_score, text='切换', command=self.fetchData)
         self.change_button.place(x=150, y=10)
@@ -140,13 +145,51 @@ class TeacherSide(Tk):
         self.popup = Menu(self.Tree, tearoff=0)
         self.popup.add_command(label="修改", command=self.stu_modify)  # , command=next) etc...
         self.popup.add_command(label="删除", command=self.stu_remove)
+
+        # 课程信息
+        self.LabelFrame_course = LabelFrame(self.Pane_right, text="课程查询", width=700, height=70)
+        # 添加控件
+        self.LabelFrame_course.place(x=10, y=10)
+        # 添加控件
+        self.Course_add = Button(self.LabelFrame_course, text="添加课程", width=7, command=self.course_add)
+        self.Course_add.place(x=10, y=5)
+
+        # 课程信息
+        self.Tree_course = Treeview(self.Pane_right, columns=("no", "course_id", "course_name",
+                                                              "description"),
+                                    show="headings", height=20)
+        self.Tree_course.bind('<Double-1>', self.course_modify)
+        # 设置每一个列的宽度和对齐的方式
+        self.Tree_course.column("no", width=50, anchor="center")
+        self.Tree_course.column("course_id", width=100, anchor="center")
+        self.Tree_course.column("course_name", width=100, anchor="center")
+        self.Tree_course.column("description", width=200, anchor="center")
+
+        # 设置每个列的标题
+        self.Tree_course.heading("no", text="序号")
+        self.Tree_course.heading("course_id", text="课程ID")
+        self.Tree_course.heading("course_name", text="课程名")
+        self.Tree_course.heading("description", text="课程简介")
+
+        self.popup = Menu(self.Tree, tearoff=0)
+        # self.popup.add_command(label="修改", command=self.stu_modify)  # , command=next) etc...
+        # self.popup.add_command(label="删除", command=self.stu_remove)
+
         self.fetchData()
+        self.show_stu()
 
     def stu_add(self):
         add_frame = StuDetail(1, None, self.Tree)
 
+    def course_add(self):
+        add_frame = CourseDetail(1, None, self.Tree_course)
+
+    def course_modify(self, *kw):
+        for item in self.Tree_course.selection():
+            add_frame = CourseDetail(2, self.Tree_course.item(item)['values'], self.Tree_course)
+
     def score_add(self):
-        add_frame = ScoreDetail(1, None, self.Tree, self.course)
+        add_frame = ScoreDetail(1, None, self.Tree, self.course_id)
 
     def stu_modify(self, *kw):
         for item in self.Tree.selection():
@@ -154,7 +197,7 @@ class TeacherSide(Tk):
 
     def score_modify(self, *kw):
         for item in self.Tree_score.selection():
-            ScoreDetail(2, self.Tree_score.item(item)['values'], self.Tree_score, self.course)
+            ScoreDetail(2, self.Tree_score.item(item)['values'], self.Tree_score, self.course_id)
 
     def stu_remove(self, *kw):
         for item in self.Tree.selection():
@@ -165,37 +208,68 @@ class TeacherSide(Tk):
 
     def show_stu(self):
         self.LabelFrame_score.place_forget()
+        self.LabelFrame_course.place_forget()
         self.Tree_score.place_forget()
+        self.Tree_course.place_forget()
         self.LabelFrame_query.place(x=10, y=10)
         self.Tree.place(x=10, y=80)
+        self.fetchData()
+
+    def show_course(self):
+        self.LabelFrame_score.place_forget()
+        self.LabelFrame_query.place_forget()
+        self.Tree_score.place_forget()
+        self.Tree.place_forget()
+        self.LabelFrame_course.place(x=10, y=10)
+        self.Tree_course.place(x=10, y=80)
+        self.fetchData()
 
     def show_score(self):
         self.LabelFrame_query.place_forget()
+        self.LabelFrame_course.place_forget()
         self.Tree.place_forget()
+        self.Tree_course.place_forget()
         self.LabelFrame_score.place(x=10, y=10)
         self.Tree_score.place(x=10, y=80)
+        self.fetchData()
 
     def fetchData(self, *kw):
         self.stuList = getStuList()
-        self.course = self.var_course.get()[2:-3]
-        if self.course == '':
+        self.courses = getCourses()
+        course_name = self.var_course.get()
+        self.course_id = ''
+        for course in self.courses:
+            if course_name == course[1]:
+                self.course_id = course[0]
+                break
+        # print('aaa', self.var_course.get(), self.course_id)
+        if self.course_id == '':
             self.scoreList = getTotalScore()
         else:
-            self.scoreList = getScore(self.course)
+            self.scoreList = getScore(self.course_id)
         self.update_tree()
 
     def update_tree(self):
         x = self.Tree.get_children()
         y = self.Tree_score.get_children()
+        z = self.Tree_course.get_children()
         for item in x:
             self.Tree.delete(item)
         for item in y:
             self.Tree_score.delete(item)
+        for item in z:
+            self.Tree_course.delete(item)
         i = 1
         total = 0
         for stu in self.stuList:
             lst = list(stu)
             self.Tree.insert("", i, values=lst)
+            i += 1
+        i = 1
+        for course in self.courses:
+            lst = list(course)
+            lst = [i] + lst
+            self.Tree_course.insert("", i, values=lst)
             i += 1
         i = 1
         for stu in self.scoreList:
@@ -204,8 +278,12 @@ class TeacherSide(Tk):
             lst = [i] + lst
             self.Tree_score.insert("", i, values=lst)
             i += 1
-        total /= len(self.scoreList)
-        total = int(total * 100) / 100
+        # print(self.scoreList)
+        if len(self.scoreList) > 0:
+            total /= len(self.scoreList)
+            total = int(total * 100) / 100
+        else:
+            total = 0
         self.var_avg.set(total)
 
     def sort_tree(self):
@@ -247,7 +325,7 @@ class TeacherSide(Tk):
         messagebox.showinfo('成功', '已导出学生信息到当前目录！')
 
     def score_xls(self):
-        workbook = xlsxwriter.Workbook(self.course + '.xlsx')  # 新建文件
+        workbook = xlsxwriter.Workbook(self.course_id + '.xlsx')  # 新建文件
         ws = workbook.add_worksheet()  # 新建sheet
         # bold = workbook.add_format({'bold': True})
         ws.write('A1', u'序号')  # 测试插入数据

@@ -1,14 +1,16 @@
 from tkinter import *
 from tkinter import messagebox
 
+from PythonStudy.design import dao
 from dao import *
 
 
 class ScoreDetail(Tk):
-    def __init__(self, state, lst, treeview, course):
+    def __init__(self, state, lst, treeview, course_id):
         super().__init__()
         self.treeview = treeview
-        self.course = course
+        self.course = dao.getCourse(course_id)
+        self.course_id = self.course[0]
         self.geometry('230x200+620+200')
         self.resizable(0, 0)
         self.state = state
@@ -36,7 +38,7 @@ class ScoreDetail(Tk):
         self.score_entry.place(x=75, y=100)
         self.cancel_button = Button(self, text='取消', command=self.cancel)
         self.cancel_button.place(x=75, y=130)
-        self.course_entry.insert(0, self.course)
+        self.course_entry.insert(0, self.course[1])
         self.course_entry['state'] = 'readonly'
         # 修改
         if state == 2:
@@ -77,14 +79,14 @@ class ScoreDetail(Tk):
         if not str(score).isdigit():
             messagebox.showwarning('提示', '分数不合法！')
             return
-        update_score(self.id_entry.get(), self.course, self.score_entry.get())
+        update_score(self.id_entry.get(), self.course_id, self.score_entry.get())
         self.modify_tree()
         messagebox.showinfo('成功', '成功修改分数！')
         self.destroy()
 
     # 更新treeview
     def modify_tree(self):
-        res = getScore(self.course)
+        res = getScore(self.course_id)
         x = self.treeview.get_children()
         for item in x:
             self.treeview.delete(item)
